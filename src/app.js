@@ -1,3 +1,4 @@
+require("dotenv").config();
 const compression = require("compression");
 const express = require("express");
 const { default: helmet } = require("helmet");
@@ -12,16 +13,17 @@ app.use(morgan("dev")); // hien thi request len console
 // morgan("tiny"); // theo doi request cuc ky ngan gon
 
 app.use(helmet()); // bao ve thong tin header, tranh doc cookie
+// curl http://localhost:3000/ --include
+
 app.use(compression()); // nen giam size du lieu tra ve
 //init db
-
+const { checkOverload } = require("./helpers/check.connect");
+checkOverload();
 //init route
-app.get("/", (req, res, next) => {
-  const strCompressed = "Hello ";
-  return res
-    .status(200)
-    .json({ message: "Hello World", metadata: strCompressed.repeat(10000) });
-});
+app.use("", require("./routes"));
+
+require("./dbs/init.mongdb");
+
 //handle error
 
 module.exports = app;
