@@ -5,6 +5,12 @@ const { default: helmet } = require("helmet");
 const app = express();
 const morgan = require("morgan");
 //init middleware
+app.use(express.json());
+app.use(
+  express.urlencoded({
+    extended: true,
+  })
+);
 app.use(morgan("dev")); // hien thi request len console
 
 // app.use(morgan("combined")); // production

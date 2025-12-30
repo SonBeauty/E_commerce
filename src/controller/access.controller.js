@@ -1,13 +1,16 @@
+const accessService = require("../services/access.service");
+
 class AccessController {
-  async signUp(req, res, next) {
+  signUp = async (req, res, next) => {
     try {
+      console.log(`P::signup::`, req.body);
       // Handle sign-up logic
 
-      return res.status(201).json({ code: "20001", metadata: { userid: 1 } });
+      return res.status(201).json(await accessService.signUp(req.body));
     } catch (error) {
       next(error);
     }
-  }
+  };
 }
 
 module.exports = new AccessController();
