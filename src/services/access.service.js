@@ -1,7 +1,7 @@
 const shopModel = require("../models/shop.model");
 const bcrypt = require("bcrypt");
 const crypto = require("crypto");
-const { access } = require("fs");
+const { createTokenPair } = require("../auth/authUtils");
 
 const RoleShop = {
   SHOP: "SHOP",
@@ -36,7 +36,26 @@ class AccessService {
         });
 
         console.log({ privateKey, publicKey }); // save collection keys
+        const { accessToken, refreshToken } = createTokenPair(
+          { userId: newShop._id },
+          publicKey,
+          privateKey
+        );
+
+        return {
+          code: 201,
+          metadata: {
+            newShop,
+            accessToken,
+            refreshToken,
+          },
+        };
       }
+
+      return {
+        code: 200,
+        metadata: null,
+      };
     } catch (error) {
       return {
         code: "xxx",
@@ -48,4 +67,3 @@ class AccessService {
 }
 
 module.exports = new AccessService();
-m;
