@@ -3,7 +3,7 @@
 const { model, Schema, Types } = require("mongoose");
 
 const DOCUMENT_NAME = "Shop";
-const COLLECTION_NAME = "shops";
+const COLLECTION_NAME = "Shops";
 
 const shopSchema = new Schema(
   {
@@ -13,6 +13,7 @@ const shopSchema = new Schema(
     status: { type: String, enum: ["active", "inactive"], default: "inactive" },
     verified: { type: Schema.Types.Boolean, default: false },
     roles: { type: Array, default: [] },
+    publicKey: { type: String },
   },
   {
     timestamps: true,

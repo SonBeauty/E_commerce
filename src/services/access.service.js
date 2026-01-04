@@ -2,6 +2,8 @@ const shopModel = require("../models/shop.model");
 const bcrypt = require("bcrypt");
 const crypto = require("crypto");
 const { createTokenPair } = require("../auth/authUtils");
+const { getInfoData } = require("../utils");
+const KeyTokenService = require("./KeyToken.service");
 
 const RoleShop = {
   SHOP: "SHOP",
@@ -31,13 +33,39 @@ class AccessService {
 
       if (newShop) {
         //created private key, public key
-        const { privateKey, publicKey } = crypto.generateKeyPairSync("rsa", {
-          modulusLength: 4096,
-        });
+        // const { privateKey, publicKey } = crypto.generateKeyPairSync("rsa", {
+        //   modulusLength: 4096,
+        //   publicKeyEncoding: {
+        //     type: "pkcs1",
+        //     format: "pem",
+        //   },
+        //   privateKeyEncoding: {
+        //     type: "pkcs1",
+        //     format: "pem",
+        //   },
+        // });
+
+        const privateKey = crypto.randomBytes(64).toString("hex");
+        const publicKey = crypto.randomBytes(64).toString("hex");
 
         console.log({ privateKey, publicKey }); // save collection keys
-        const { accessToken, refreshToken } = createTokenPair(
+
+        const keyStore = await KeyTokenService.createKeyToken({
+          userId: newShop._id,
+          publicKey,
+          privateKey,
+        });
+
+        console.log("keyStore", keyStore);
+
+        if (!keyStore)
+          return { code: "xxx", message: "keyStore error", status: 500 };
+
+        // const publicKeyObject = crypto.createPublicKey(publicKeyString);
+
+        const tokens = createTokenPair(
           { userId: newShop._id },
+          // publicKeyObject,
           publicKey,
           privateKey
         );
@@ -45,9 +73,11 @@ class AccessService {
         return {
           code: 201,
           metadata: {
-            newShop,
-            accessToken,
-            refreshToken,
+            shop: getInfoData({
+              fields: ["_id", "name", "email", "roles"],
+              object: newShop,
+            }),
+            tokens,
           },
         };
       }
