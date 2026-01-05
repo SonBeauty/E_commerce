@@ -31,5 +31,21 @@ app.use("", require("./routes"));
 require("./dbs/init.mongdb");
 
 //handle error
+// middleware 3 parameter
+app.use((req, res, next) => {
+  const error = new Error("Not Found");
+  error.status = 404;
+  next(error);
+});
+
+//error middleware 4 parameter
+app.use((error, req, res, next) => {
+  const statusCode = error.status || 500;
+  return res.status(statusCode).json({
+    status: "error",
+    code: statusCode,
+    message: error.message || "Internal Server Error",
+  });
+});
 
 module.exports = app;
