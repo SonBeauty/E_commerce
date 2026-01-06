@@ -1,18 +1,20 @@
 const JWT = require("jsonwebtoken");
 
-const createTokenPair = (payload, publicKey, privateKey) => {
+const createTokenPair = async (payload, publicKey, privateKey) => {
   try {
     const accessToken = JWT.sign(payload, privateKey, {
       expiresIn: "2 days",
-      algorithm: "RS256",
+      // dung cai nay phai pem
+      // algorithm: "RS256",
     });
 
     const refreshToken = JWT.sign({ userId: 1 }, privateKey, {
       expiresIn: "7 days",
-      algorithm: "RS256",
+      // dung cai nay phai pem
+      // algorithm: "RS256",
     });
 
-    JWT.verify(accessToken, publicKey, (err, decoded) => {
+    JWT.verify(accessToken, privateKey, (err, decoded) => {
       if (err) {
         console.error("JWT verification failed:", err);
       } else {
@@ -21,7 +23,9 @@ const createTokenPair = (payload, publicKey, privateKey) => {
     });
 
     return { accessToken, refreshToken };
-  } catch (error) {}
+  } catch (error) {
+    console.log("Error creating token pair:", error.message);
+  }
 };
 
 module.exports = {

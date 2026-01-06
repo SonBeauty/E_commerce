@@ -5,6 +5,8 @@ const { createTokenPair } = require("../auth/authUtils");
 const { getInfoData } = require("../utils");
 const KeyTokenService = require("./KeyToken.service");
 const { BadRequestError } = require("../core/error.response");
+const { findByEmail } = require("./shop.service");
+const { AuthFailureError } = require("../core/error.response");
 
 const RoleShop = {
   SHOP: "SHOP",
@@ -13,6 +15,54 @@ const RoleShop = {
   ADMIN: "ADMIN",
 };
 class AccessService {
+  /**
+   * 1 - check email
+   * 2 - match password
+   * 3 - create access token, refresh token
+   * 4 - generate token
+   * 5 - get data return
+   */
+  login = async ({ email, password, refreshToken }) => {
+    //1
+    const foundShop = await findByEmail({ email });
+    if (!foundShop) {
+      throw new BadRequestError("Email not found");
+    }
+
+    //2
+    const match = await bcrypt.compare(password, foundShop.password);
+    if (!match) {
+      throw new AuthFailureError("Password is incorrect");
+    }
+
+    //3
+    const privateKey = crypto.randomBytes(64).toString("hex");
+    const publicKey = crypto.randomBytes(64).toString("hex");
+
+    //4
+    const tokens = await createTokenPair(
+      { userId: foundShop._id },
+      publicKey,
+      privateKey
+    );
+
+    await KeyTokenService.createKeyToken({
+      refreshToken: tokens.refreshToken,
+      publicKey,
+      privateKey,
+      userId: foundShop._id,
+    });
+
+    //5
+    return {
+      shop: getInfoData({
+        fields: ["_id", "name", "email", "roles"],
+        object: foundShop,
+      }),
+      tokens,
+    };
+  };
+
   signUp = async ({ name, email, password }) => {
     try {
       const hodelShop = await shopModel.findOne({ email }).lean(); // return object javascript
@@ -60,7 +110,7 @@ class AccessService {
 
         // const publicKeyObject = crypto.createPublicKey(publicKeyString);
 
-        const tokens = createTokenPair(
+        const tokens = await createTokenPair(
           { userId: newShop._id },
           // publicKeyObject,
           publicKey,
@@ -68,14 +118,11 @@ class AccessService {
         );
 
         return {
-          code: 201,
-          metadata: {
-            shop: getInfoData({
-              fields: ["_id", "name", "email", "roles"],
-              object: newShop,
-            }),
-            tokens,
-          },
+          shop: getInfoData({
+            fields: ["_id", "name", "email", "roles"],
+            object: newShop,
+          }),
+          tokens,
         };
       }
 

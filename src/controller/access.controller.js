@@ -1,9 +1,20 @@
 const accessService = require("../services/access.service");
 
+const { OK, CREATED, SuccessResponse } = require("../core/success.response");
 // Controller for handling access-related requests
 class AccessController {
-  signUp = async (req, res, next) => {
-    return res.status(201).json(await accessService.signUp(req.body));
+  login = async (req, res) => {
+    return new SuccessResponse({
+      message: "Login successful",
+      metadata: await accessService.login(req.body),
+    }).send(res);
+  };
+
+  signUp = async (req, res) => {
+    return new CREATED({
+      message: "User created successfully",
+      metadata: await accessService.signUp(req.body),
+    }).send(res);
   };
 }
 
