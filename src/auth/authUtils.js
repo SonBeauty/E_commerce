@@ -21,7 +21,6 @@ const createTokenPair = async (payload, publicKey, privateKey) => {
         console.log("JWT verification successful:", decoded);
       }
     });
-
     return { accessToken, refreshToken };
   } catch (error) {
     console.log("Error creating token pair:", error.message);
