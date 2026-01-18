@@ -15,6 +15,11 @@ const RoleShop = {
   ADMIN: "ADMIN",
 };
 class AccessService {
+  logout = async ({ keyStore }) => {
+    const delKey = await KeyTokenService.removeKeyById(keyStore._id);
+    console.log(delKey);
+    return delKey;
+  };
   /**
    * 1 - check email
    * 2 - match password
@@ -36,14 +41,23 @@ class AccessService {
     }
 
     //3
-    const privateKey = crypto.randomBytes(64).toString("hex");
-    const publicKey = crypto.randomBytes(64).toString("hex");
+    const { publicKey, privateKey } = crypto.generateKeyPairSync("rsa", {
+      modulusLength: 2048,
+      publicKeyEncoding: {
+        type: "pkcs1",
+        format: "pem",
+      },
+      privateKeyEncoding: {
+        type: "pkcs1",
+        format: "pem",
+      },
+    });
 
     //4
     const tokens = await createTokenPair(
-      { userId: foundShop._id },
+      { userId: foundShop._id.toString() },
       publicKey,
-      privateKey
+      privateKey,
     );
 
     await KeyTokenService.createKeyToken({
@@ -114,7 +128,7 @@ class AccessService {
           { userId: newShop._id },
           // publicKeyObject,
           publicKey,
-          privateKey
+          privateKey,
         );
 
         return {
