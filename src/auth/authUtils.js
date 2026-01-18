@@ -1,4 +1,5 @@
 const JWT = require("jsonwebtoken");
+const { asyncHandler } = require("./checkAuth");
 
 const createTokenPair = async (payload, publicKey, privateKey) => {
   try {
@@ -26,6 +27,8 @@ const createTokenPair = async (payload, publicKey, privateKey) => {
     console.log("Error creating token pair:", error.message);
   }
 };
+
+const authentication = asyncHandler();
 
 module.exports = {
   createTokenPair,
