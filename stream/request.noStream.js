@@ -15,3 +15,7 @@ server.on("request", (req, res) => {
 
 server.listen(8000);
 process.title = "node 8000";
+
+// cpu memory 706,4 MB
+
+// luu toan bo data vao cache, tra ve toan bo data
