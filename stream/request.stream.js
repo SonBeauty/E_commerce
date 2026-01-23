@@ -19,4 +19,5 @@ process.title = "node 8001";
 
 // cpu memory 25 MB
 
-// luu tru 1 phan data tren bo nho, khong luu toan bo data vao cache, tra ve tung phan data
+// luu tru 1 phan data tren bo nho, khong luu toan bo data vao cache,
+// tra ve tung phan data
