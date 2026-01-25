@@ -7,6 +7,7 @@ const KeyTokenService = require("./KeyToken.service");
 const { BadRequestError } = require("../core/error.response");
 const { findByEmail } = require("./shop.service");
 const { AuthFailureError } = require("../core/error.response");
+const JWT = require("jsonwebtoken");
 
 const RoleShop = {
   SHOP: "SHOP",
@@ -15,6 +16,19 @@ const RoleShop = {
   ADMIN: "ADMIN",
 };
 class AccessService {
+  handlerRefreshToken = async (refreshToken) => {
+    const foundToken =
+      await KeyTokenService.findByRefreshTokenUsed(refreshToken);
+
+    // decode xem la ai
+    if (foundToken) {
+      const { userId, email } = await verifyJWT(
+        refreshToken,
+        foundToken.privateKey,
+      );
+    }
+  };
+
   logout = async ({ keyStore }) => {
     const delKey = await KeyTokenService.removeKeyById(keyStore._id);
     console.log(delKey);
@@ -153,5 +167,9 @@ class AccessService {
     }
   };
 }
+
+const verifyJWT = async (token, secretKey) => {
+  return await JWT.verify(token, secretKey);
+};
 
 module.exports = new AccessService();
